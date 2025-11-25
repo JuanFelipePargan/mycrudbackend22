@@ -26,51 +26,56 @@ db.connect((err) => {
   }
 });
 
-// ✅ Routes
+// ✅ Root route for health check
 app.get('/', (req, res) => {
   res.send('Backend is running on Railway!');
 });
 
+// ✅ GET all todos (with logging)
 app.get('/todos', (req, res) => {
+  console.log("✅ GET /todos called");   // <-- Added logging line
   db.query('SELECT * FROM todos', (err, results) => {
     if (err) {
-      console.error("Error fetching todos:", err.message);
+      console.error("❌ DB error:", err.message);
       return res.status(500).json({ error: err.message });
     }
     res.json(results);
   });
 });
 
+// ✅ POST new todo
 app.post('/todos', (req, res) => {
   const { task } = req.body;
   if (!task) return res.status(400).json({ error: "Task is required" });
 
   db.query('INSERT INTO todos (task) VALUES (?)', [task], (err, result) => {
     if (err) {
-      console.error("Error inserting todo:", err.message);
+      console.error("❌ Error inserting todo:", err.message);
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Added', id: result.insertId });
   });
 });
 
+// ✅ PUT update todo
 app.put('/todos/:id', (req, res) => {
   const { id } = req.params;
   const { task } = req.body;
   db.query('UPDATE todos SET task = ? WHERE id = ?', [task, id], (err) => {
     if (err) {
-      console.error("Error updating todo:", err.message);
+      console.error("❌ Error updating todo:", err.message);
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Updated' });
   });
 });
 
+// ✅ DELETE todo
 app.delete('/todos/:id', (req, res) => {
   const { id } = req.params;
   db.query('DELETE FROM todos WHERE id = ?', [id], (err) => {
     if (err) {
-      console.error("Error deleting todo:", err.message);
+      console.error("❌ Error deleting todo:", err.message);
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Deleted' });
