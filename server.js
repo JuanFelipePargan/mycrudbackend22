@@ -1,5 +1,5 @@
-// Triggering clean build
-
+require('dotenv').config();
+console.log("Loaded DB_USER:", process.env.DB_USER);
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -8,12 +8,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ MySQL connection using Railway environment variables
+// ✅ MySQL connection using environment variables
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,         // mysql.railway.internal
-  user: process.env.DB_USER,         // root
-  password: process.env.DB_PASSWORD, // your Railway MySQL password
-  database: process.env.DB_NAME      // railway
+  host: process.env.DB_HOST,        // e.g. mysql.railway.internal
+  user: process.env.DB_USER,        // e.g. root
+  password: process.env.DB_PASSWORD,// from Railway Credentials tab
+  database: process.env.DB_NAME     // e.g. railway
 });
 
 // ✅ GET all todos
@@ -33,27 +33,35 @@ app.post('/todos', (req, res) => {
   });
 });
 
-// ✅ DELETE todo
-app.delete('/todos/:id', (req, res) => {
-  const { id } = req.params;
-  db.query('DELETE FROM todos WHERE id = ?', [id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Deleted' });
-  });
-});
-
-// ✅ UPDATE todo
+// ✅ PUT update todo
 app.put('/todos/:id', (req, res) => {
   const { id } = req.params;
   const { task } = req.body;
-  db.query('UPDATE todos SET task = ? WHERE id = ?', [task, id], (err) => {
+  db.query('UPDATE todos SET task = ? WHERE id = ?', [task, id], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Updated' });
   });
 });
 
-// ✅ Start server
-const PORT = process.env.PORT || 8080;
+// ✅ Root route for quick health check
+app.get("/", (req, res) => {
+  res.send("Backend is running!");
+});
+
+
+// ✅ DELETE todo
+app.delete('/todos/:id', (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM todos WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: 'Deleted' });
+  });
+});
+
+// ✅ Listen on Railway-assigned port or fallback to 8080
+const PORT = process.env.PORT || 3001;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
