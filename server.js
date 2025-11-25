@@ -44,9 +44,10 @@ app.put('/todos/:id', (req, res) => {
 });
 
 // ✅ Root route for quick health check
-app.get("/", (req, res) => {
-  res.send("Backend is running!");
+app.get('/', (req, res) => {
+  res.send('Backend is running on Railway!');
 });
+
 
 
 // ✅ DELETE todo
@@ -60,7 +61,6 @@ app.delete('/todos/:id', (req, res) => {
 
 // ✅ Listen on Railway-assigned port or fallback to 8080
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
